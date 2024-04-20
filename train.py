@@ -4,7 +4,7 @@ from data import ImagesField, TextField, RawField,ImagesField_noncoco
 from data import COCO,DataLoader,XM3600, CC3M
 import evaluation
 from evaluation import PTBTokenizer, Cider
-from models.transformer import Transformer_visualgpt, VisualEncoder, ScaledDotProductAttentionMemory, ScaledDotProductAttention
+from models.transformer import Violet, VisualEncoder, ScaledDotProductAttentionMemory, ScaledDotProductAttention
 import torch
 from torch.optim import Adam
 from torch.nn import NLLLoss
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
     # Model and dataloaders
     encoder = VisualEncoder(args.encoder_layer, 0, attention_module=ScaledDotProductAttention)
-    model = Transformer_visualgpt(text_field.vocab.stoi['<|endoftext|>'], encoder, args.gpt_model_type, args.decoder_layer,tau=args.tau)
+    model = Violet(text_field.vocab.stoi['<|endoftext|>'], encoder, args.gpt_model_type, args.decoder_layer,tau=args.tau)
 
 
 
@@ -340,13 +340,11 @@ if __name__ == '__main__':
             writer.add_scalar('data/val_cider', val_cider, e)
             writer.add_scalar('data/val_bleu1', scores['BLEU'][0], e)
             writer.add_scalar('data/val_bleu4', scores['BLEU'][3], e)
-            # writer.add_scalar('data/val_meteor', scores['METEOR'], e)
             writer.add_scalar('data/val_rouge', scores['ROUGE'], e)
 
             logging.info("val cider"+str(val_cider)+"current epoch "+str(e))
             logging.info("val bleu1" + str(scores["BLEU"][0]) + "current epoch " + str(e))
             logging.info("val bleu4" + str(scores["BLEU"][3]) + "current epoch " + str(e))
-            # logging.info("val meteor"+str(scores["METEOR"])+"current epoch "+str(e))
             logging.info("val rouge" + str(scores["ROUGE"]) + "current epoch " + str(e))
 
 
