@@ -17,7 +17,7 @@ class Violet(CaptioningModel):
         super(Violet, self).__init__()
         self.bos_idx = bos_idx
         self.encoder = encoder
-        self.clip = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-base-patch32",cache_dir = "/home/abdo95/scratch/Visual-Jasmine").to("cuda")
+        self.clip = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-large-patch14",cache_dir = "/home/abdo95/projects/rrg-mageed/VLM/VioletV2/VioletV2").to("cuda")
         # self.clip.to("cuda")
         jasmine = AutoModelForCausalLM.from_pretrained("./jasminemodel/eyad-bs")  
         state_dict = jasmine.state_dict()
@@ -80,9 +80,9 @@ class Violet(CaptioningModel):
         #model = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-large-patch14")
         images = images.to("cuda")
         outputs = self.clip(images) #the clip boi
-        # image_embeds = outputs.image_embeds # Visual projection output
-        # image_embeds = image_embeds.unsqueeze(1)
-        image_embeds = outputs.last_hidden_state #patches
+        image_embeds = outputs.image_embeds # Visual projection output
+        image_embeds = image_embeds.unsqueeze(1)
+        # image_embeds = outputs.last_hidden_state #patches
         enc_output,_ = self.encoder(image_embeds) #Three encoders output
         dec_output,past = self.decoder(seq, enc_output)
         return dec_output,past
@@ -99,7 +99,8 @@ class Violet(CaptioningModel):
             if t == 0:
                 with torch.no_grad():
                     outputs = self.clip(visual) #the clip boi
-                    image_embeds = outputs.last_hidden_state 
+                    image_embeds = outputs.image_embeds # Visual projection output
+                    image_embeds = image_embeds.unsqueeze(1)
                 self.enc_output, self.mask_enc = self.encoder(image_embeds)
                 if isinstance(visual, torch.Tensor):
                     it = visual.data.new_full((visual.shape[0], 1), self.bos_idx).long()
